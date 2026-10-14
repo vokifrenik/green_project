@@ -8,7 +8,9 @@ import geopandas as gpd
 folder_name = 'sofia_dual'
 
 # List of CSV files to read from
-files = ['image_0_data.csv', 'image_1_data.csv', 'image_2_data.csv', 'image_3_data.csv', 'image_4_data.csv', 'image_5_data.csv', 'image_6_data.csv']
+import glob, re
+files = sorted((os.path.basename(f) for f in glob.glob(os.path.join(folder_name, 'image_*_data.csv'))),
+               key=lambda f: int(re.search(r'image_(\d+)_', f).group(1)))
 
 # Prepend the folder name to each file path
 file_paths = [os.path.join(folder_name, file) for file in files]
@@ -62,7 +64,7 @@ def calculate_row_correlation(row):
 combined_df['correlation'] = combined_df.apply(calculate_row_correlation, axis=1)
 
 # Load the GeoJSON file
-geojson_path = r"C:\job\sofia\uz_26_sofpr_20090000.geojson"
+geojson_path = "data/uz_26_sofpr_20090000.geojson"
 gdf = gpd.read_file(geojson_path)
 
 # Extract the 'id' and 'new_end' fields from the GeoJSON 'properties'

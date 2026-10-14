@@ -8,6 +8,7 @@ from scipy.ndimage import distance_transform_edt
 from shapely.geometry import box
 from rasterio.merge import merge
 from rasterio.mask import mask
+from download_vpp import download_all, find_pairs
 
 
 # Create the output directory if it doesn't exist
@@ -256,21 +257,22 @@ image_pairs = [
 ]
 """
 
-## List of images
-folder_name = "tif_files_sofia_dual/TPROD"
-image_pairs = [
-    (f"{folder_name}/VPP_2017_S2_T34TFN-010m_V101_s1_TPROD.tif", f"{folder_name}/VPP_2017_S2_T34TGN-010m_V101_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2018_S2_T34TFN-010m_V101_s1_TPROD.tif", f"{folder_name}/VPP_2018_S2_T34TGN-010m_V101_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2019_S2_T34TFN-010m_V101_s1_TPROD.tif", f"{folder_name}/VPP_2019_S2_T34TGN-010m_V101_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2020_S2_T34TFN-010m_V101_s1_TPROD.tif", f"{folder_name}/VPP_2020_S2_T34TGN-010m_V101_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2021_S2_T34TFN-010m_V105_s1_TPROD.tif", f"{folder_name}/VPP_2021_S2_T34TGN-010m_V105_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2022_S2_T34TFN-010m_V105_s1_TPROD.tif", f"{folder_name}/VPP_2022_S2_T34TGN-010m_V105_s1_TPROD.tif"),
-    (f"{folder_name}/VPP_2023_S2_T34TFN-010m_V105_s1_TPROD.tif", f"{folder_name}/VPP_2023_S2_T34TGN-010m_V105_s1_TPROD.tif")    
-]
+## Paths (relative to this folder, so it runs on any machine)
+geojson_path = "data/uz_26_sofpr_20090000.geojson"
+folder_name = "tif_files_sofia"
+TILE_A, TILE_B = "T34TFN", "T34TGN"
 
-## Set the necessary paths
-#geojson_path = r"C:\job\ruse\FUs_Ruse_ID.geojson"
-geojson_path = r"C:\job\sofia\uz_26_sofpr_20090000.geojson"
+## Download the rasters from WEkEO (files already on disk are skipped).
+## Comment this line out to work offline with the files you already have.
+download_all(geojson_path, folder_name, tiles=[TILE_A, TILE_B])
+
+## Pair up the two tiles of each year
+found = find_pairs(folder_name, TILE_A, TILE_B)
+years = [y for y, _, _ in found]
+assert years and years == list(range(years[0], years[0] + len(years))), \
+    f"Years must be consecutive, found: {years}"
+image_pairs = [(a, b) for _, a, b in found]
+print(f"Processing {len(image_pairs)} years: {years[0]}-{years[-1]}")
 
 for i, (raster_path1, raster_path2) in enumerate(image_pairs):
     merged_raster_path = os.path.join("sofia_dual", f'merged_raster_{i}.tif')
