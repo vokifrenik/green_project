@@ -42,7 +42,8 @@ for i, file_path in enumerate(file_paths):
         print(f"File not found: {file_path}")
 
 # Convert all columns to numeric, coercing errors to NaN
-combined_df.iloc[:, 1:] = combined_df.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
+for col in combined_df.columns[1:]:
+    combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce')
 
 # Calculate the 'max' and 'min' columns
 combined_df['max'] = combined_df.iloc[:, 1:].max(axis=1)
