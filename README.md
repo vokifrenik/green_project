@@ -86,3 +86,9 @@ repo for reference — not inputs to anything.
   updating per machine/environment.
 - `bin_to_green.py` and `centroid_finder.py` are standalone tools, not wired into
   the main `full_chain*` loops.
+
+  ## Automatic download of tif files
+  The relevant tif files can be downloaded by running the `download_vpp.py` script using
+  the --download command. Files already existing on the machine will be skipped. This process
+  is already implemented into the `full_chain_dual_raster.py` script and should perform the
+  downloading of the files automatically without having to run the download script separately.  
